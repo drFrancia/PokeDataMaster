@@ -48,39 +48,26 @@ JOIN
     entrenadores e ON p.id_entrenador = e.id;
 
 
-BEGIN TRANSACTION;
+BEGIN;
 
--- Paso 1: Eliminar registros relacionados en Batallas donde Brock participa como id_entrenador1
-DELETE FROM batallas
-WHERE id_entrenador1 = 
-(SELECT id 
-FROM entrenadores 
-WHERE nombre = 'Brock');
-
--- Paso 2: Eliminar registros relacionados en Batallas donde Brock participa como id_entrenador2
-DELETE FROM batallas
-WHERE id_entrenador2 = 
-(SELECT id 
-FROM entrenadores 
-WHERE nombre = 'Brock');
-
--- Paso 3: Eliminar los Pokémon asociados con Brock
-DELETE FROM pokemones
-WHERE id_entrenador = 
-(SELECT id 
-FROM entrenadores 
-WHERE nombre = 'Brock');
-
--- Paso 4: Eliminar registros relacionados en entrenador_pokemon donde Brock es el entrenador
+-- Paso 1: Eliminar registros en `entrenador_pokemon` relacionados con los Pokémon que están a punto de ser eliminados
 DELETE FROM entrenador_pokemon
-WHERE entrenador_id = 
-(SELECT id 
-FROM entrenadores 
-WHERE nombre = 'Brock');
+WHERE pokemon_id IN (SELECT id FROM pokemones WHERE id_entrenador = (SELECT id FROM entrenadores WHERE nombre = 'Brock'));
 
--- Paso 5: Eliminar el entrenador Brock de la tabla entrenadores
+-- Paso 2: Eliminar registros en `batallas` donde el entrenador Brock participa como `id_entrenador1`
+DELETE FROM batallas
+WHERE id_entrenador1 = (SELECT id FROM entrenadores WHERE nombre = 'Brock');
+
+-- Paso 3: Eliminar registros en `batallas` donde el entrenador Brock participa como `id_entrenador2`
+DELETE FROM batallas
+WHERE id_entrenador2 = (SELECT id FROM entrenadores WHERE nombre = 'Brock');
+
+-- Paso 4: Eliminar los Pokémon asociados con el entrenador Brock
+DELETE FROM pokemones
+WHERE id_entrenador = (SELECT id FROM entrenadores WHERE nombre = 'Brock');
+
+-- Paso 5: Eliminar el entrenador Brock de la tabla `entrenadores`
 DELETE FROM entrenadores
 WHERE nombre = 'Brock';
 
-COMMIT TRANSACTION;
-
+COMMIT;
